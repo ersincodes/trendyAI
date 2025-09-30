@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+# Build outputs
+dist/
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+# Env
+.env
+.env.*
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+# Cache
+.eslintcache
+.vite/
+.parcel-cache/
+.turbo/
+# Misc
+.DS_Store
+Thumbs.db
+*.tsbuildinfo
