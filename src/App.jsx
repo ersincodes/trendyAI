@@ -3,6 +3,7 @@ import { PROMPTS } from "./constants/prompts";
 import ImageUploader from "./components/ImageUploader";
 import PromptSelector from "./components/PromptSelector";
 import ResultPanel from "./components/ResultPanel";
+import TabView from "./components/TabView";
 import { InstagramIcon } from "./components/icons/Icons";
 
 const App = () => {
@@ -237,35 +238,61 @@ const App = () => {
           </div>
         </header>
 
-        <main className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-gray-800 p-6 rounded-2xl shadow-2xl flex flex-col gap-6">
-            <ImageUploader
-              selectedImage={selectedImage}
-              onChange={handleImageUpload}
-            />
-            <PromptSelector
-              prompts={PROMPTS}
-              selectedPromptId={selectedPromptId}
-              onSelect={setSelectedPromptId}
-            />
-            <button
-              onClick={handleGenerateImage}
-              disabled={!selectedImage || !selectedPromptId || isLoading}
-              className="w-full mt-auto py-3 px-4 rounded-lg text-lg font-bold text-white bg-gradient-to-r from-blue-600 to-blue-200 hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2">
-              {isLoading ? "Generating..." : "Transform Image"}
-            </button>
-          </div>
+        <main>
+          <TabView
+            tabs={[
+              {
+                id: "joy",
+                label: "Joy",
+                content: (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="bg-gray-800 p-6 rounded-2xl shadow-2xl flex flex-col gap-6">
+                      <ImageUploader
+                        selectedImage={selectedImage}
+                        onChange={handleImageUpload}
+                      />
+                      <PromptSelector
+                        prompts={PROMPTS}
+                        selectedPromptId={selectedPromptId}
+                        onSelect={setSelectedPromptId}
+                      />
+                      <button
+                        onClick={handleGenerateImage}
+                        disabled={
+                          !selectedImage || !selectedPromptId || isLoading
+                        }
+                        className="w-full mt-auto py-3 px-4 rounded-lg text-lg font-bold text-white bg-gradient-to-r from-blue-600 to-blue-200 hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2">
+                        {isLoading ? "Generating..." : "Transform Image"}
+                      </button>
+                    </div>
 
-          <ResultPanel
-            isLoading={isLoading}
-            error={error}
-            generatedImage={generatedImage}
-            generatedCaption={generatedCaption}
-            isCaptionLoading={isCaptionLoading}
-            captionCopied={captionCopied}
-            onDownload={handleDownload}
-            onGenerateCaption={handleGenerateCaption}
-            onCopyCaption={handleCopyCaption}
+                    <ResultPanel
+                      isLoading={isLoading}
+                      error={error}
+                      generatedImage={generatedImage}
+                      generatedCaption={generatedCaption}
+                      isCaptionLoading={isCaptionLoading}
+                      captionCopied={captionCopied}
+                      onDownload={handleDownload}
+                      onGenerateCaption={handleGenerateCaption}
+                      onCopyCaption={handleCopyCaption}
+                    />
+                  </div>
+                ),
+              },
+              {
+                id: "prompt",
+                label: "Prompt",
+                content: (
+                  <div className="bg-gray-800 p-6 rounded-2xl shadow-2xl">
+                    <p className="text-gray-400">
+                      Prompt tab will be implemented next.
+                    </p>
+                  </div>
+                ),
+              },
+            ]}
+            initialActiveId="joy"
           />
         </main>
       </div>
