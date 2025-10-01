@@ -2,9 +2,16 @@ import { useState, useCallback, useMemo } from "react";
 import { PROMPTS } from "./constants/prompts";
 import ImageUploader from "./components/ImageUploader";
 import PromptSelector from "./components/PromptSelector";
+import PromptEnter from "./components/PromptEnter";
 import ResultPanel from "./components/ResultPanel";
 import TabView from "./components/TabView";
 import { InstagramIcon } from "./components/icons/Icons";
+import {
+  generateImage as geminiGenerateImage,
+  generateText as geminiGenerateText,
+} from "./lib/gemini";
+import { isFileTooLarge, readFileAsDataUrl } from "./lib/image";
+import { copyToClipboard, downloadDataUrl } from "./lib/io";
 
 const App = () => {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -15,29 +22,30 @@ const App = () => {
   const [generatedCaption, setGeneratedCaption] = useState("");
   const [isCaptionLoading, setIsCaptionLoading] = useState(false);
   const [captionCopied, setCaptionCopied] = useState(false);
+  const [customPrompt, setCustomPrompt] = useState("");
 
   const selectedPrompt = useMemo(() => {
     return PROMPTS.find((p) => p.id === selectedPromptId);
   }, [selectedPromptId]);
 
-  const handleImageUpload = useCallback((event) => {
+  const handleImageUpload = useCallback(async (event) => {
     const file = event.target.files && event.target.files[0];
     if (!file) return;
 
-    const maxBytes = 10 * 1024 * 1024;
-    if (file.size > maxBytes) {
+    if (isFileTooLarge(file)) {
       setError("File size exceeds 10MB. Please upload a smaller image.");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setSelectedImage(reader.result);
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      setSelectedImage(dataUrl);
       setGeneratedImage(null);
       setGeneratedCaption("");
       setError(null);
-    };
-    reader.readAsDataURL(file);
+    } catch {
+      setError("Failed to read the image file. Please try again.");
+    }
   }, []);
 
   const handleGenerateImage = useCallback(async () => {
@@ -52,59 +60,11 @@ const App = () => {
     setGeneratedCaption("");
 
     try {
-      const base64ImageData = selectedImage.split(",")[1];
-      const mimeMatch = selectedImage.match(/^data:(.*?);base64,/);
-      const mimeType = mimeMatch?.[1] || "image/jpeg";
-
-      const payload = {
-        contents: [
-          {
-            parts: [
-              { text: selectedPrompt.prompt },
-              { inlineData: { mimeType, data: base64ImageData } },
-            ],
-          },
-        ],
-        generationConfig: {
-          responseModalities: ["IMAGE", "TEXT"],
-        },
-      };
-
-      const apiKey = (import.meta.env.VITE_GOOGLE_API_KEY || "").trim();
-      if (!apiKey) {
-        throw new Error(
-          "Missing API key. Please add VITE_GOOGLE_API_KEY to your .env file."
-        );
-      }
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
-
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+      const imageUrl = await geminiGenerateImage({
+        text: selectedPrompt.prompt,
+        dataUrl: selectedImage,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(
-          errorData?.error?.message || `API request failed: ${response.status}`
-        );
-      }
-
-      const result = await response.json();
-      const base64Data = result?.candidates?.[0]?.content?.parts?.find(
-        (p) => p.inlineData
-      )?.inlineData?.data;
-
-      if (base64Data) {
-        setGeneratedImage(`data:image/png;base64,${base64Data}`);
-      } else {
-        const textResponse = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-        throw new Error(
-          textResponse ||
-            "No valid image data received from the API. Please try again with a different image."
-        );
-      }
+      setGeneratedImage(imageUrl);
     } catch (err) {
       console.error(err);
       setError(`An error occurred: ${err.message}`);
@@ -121,38 +81,8 @@ const App = () => {
 
     try {
       const captionPrompt = `Create a catchy and witty Instagram caption that matches the following theme. Add popular related English hashtags at the end. Keep it short and engaging. Theme: ${selectedPrompt.title}`;
-      const payload = {
-        contents: [{ parts: [{ text: captionPrompt }] }],
-      };
-      const apiKey = (import.meta.env.VITE_GOOGLE_API_KEY || "").trim();
-      if (!apiKey) {
-        throw new Error(
-          "Missing API key. Please add VITE_GOOGLE_API_KEY to your .env file."
-        );
-      }
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(
-          errorData?.error?.message || "Failed to generate the caption."
-        );
-      }
-
-      const result = await response.json();
-      const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-      if (text) {
-        setGeneratedCaption(text);
-      } else {
-        throw new Error("No valid text received from the API.");
-      }
+      const text = await geminiGenerateText({ text: captionPrompt });
+      setGeneratedCaption(text);
     } catch (err) {
       console.error(err);
       setError(
@@ -163,57 +93,81 @@ const App = () => {
     }
   }, [selectedPrompt]);
 
-  const handleCopyCaption = useCallback(() => {
+  const handleGenerateCaptionForCustomPrompt = useCallback(async () => {
+    const promptText = customPrompt.trim();
+    if (!promptText) return;
+    setIsCaptionLoading(true);
+    setGeneratedCaption("");
+    setError(null);
+
+    try {
+      const captionPrompt = `Create a catchy and witty Instagram caption based on the following prompt. Add popular related English hashtags at the end. Keep it short and engaging. Prompt: ${promptText}`;
+      const text = await geminiGenerateText({ text: captionPrompt });
+      setGeneratedCaption(text);
+    } catch (err) {
+      console.error(err);
+      setError(
+        `An error occurred while generating the caption: ${err.message}`
+      );
+    } finally {
+      setIsCaptionLoading(false);
+    }
+  }, [customPrompt]);
+
+  const handleCopyCaption = useCallback(async () => {
     if (!generatedCaption) return;
-    navigator.clipboard
-      .writeText(generatedCaption)
-      .then(() => {
-        setCaptionCopied(true);
-        setTimeout(() => setCaptionCopied(false), 2000);
-      })
-      .catch((err) => {
-        console.error("Failed to copy text: ", err);
-        try {
-          const textArea = document.createElement("textarea");
-          textArea.value = generatedCaption;
-          document.body.appendChild(textArea);
-          textArea.focus();
-          textArea.select();
-          document.execCommand("copy");
-          document.body.removeChild(textArea);
-          setCaptionCopied(true);
-          setTimeout(() => setCaptionCopied(false), 2000);
-        } catch {
-          setError("Failed to copy text to clipboard.");
-        }
-      });
+    const success = await copyToClipboard(generatedCaption);
+    if (success) {
+      setCaptionCopied(true);
+      setTimeout(() => setCaptionCopied(false), 2000);
+    } else {
+      setError("Failed to copy text to clipboard.");
+    }
   }, [generatedCaption]);
 
-  const handleDownload = useCallback(() => {
+  const handleDownload = useCallback(async () => {
     if (!generatedImage) return;
 
-    fetch(generatedImage)
-      .then((res) => res.blob())
-      .then((blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        const safeTitle = (selectedPrompt?.title || "image")
-          .toLowerCase()
-          .replace(/\s+/g, "-");
-        a.download = `trendy-ai-${safeTitle}.png`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-      })
-      .catch((err) => {
-        console.error("Error during download:", err);
-        setError(
-          "An error occurred while downloading the image. Please try again."
-        );
-      });
+    const safeTitle = (selectedPrompt?.title || "image")
+      .toLowerCase()
+      .replace(/\s+/g, "-");
+    const ok = await downloadDataUrl(
+      generatedImage,
+      `trendy-ai-${safeTitle}.png`
+    );
+    if (!ok) {
+      setError(
+        "An error occurred while downloading the image. Please try again."
+      );
+    }
   }, [generatedImage, selectedPrompt]);
+
+  const handleGenerateFromCustomPrompt = useCallback(async () => {
+    const hasImage = !!selectedImage;
+    const hasPrompt = !!customPrompt.trim();
+    if (!hasPrompt && !hasImage) {
+      setError("Please enter a prompt or upload an image.");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    setGeneratedImage(null);
+    setGeneratedCaption("");
+
+    try {
+      const imageUrl = await geminiGenerateImage({
+        text: hasPrompt ? customPrompt.trim() : undefined,
+        dataUrl: hasImage ? selectedImage : undefined,
+      });
+      setGeneratedImage(imageUrl);
+    } catch (err) {
+      console.error(err);
+      setError(`An error occurred: ${err.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [customPrompt, selectedImage]);
 
   return (
     <div className="bg-gray-900 text-white min-h-screen font-sans p-4 sm:p-6 lg:p-8">
@@ -242,8 +196,8 @@ const App = () => {
           <TabView
             tabs={[
               {
-                id: "joy",
-                label: "Joy",
+                id: "trend",
+                label: "Trend",
                 content: (
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div className="bg-gray-800 p-6 rounded-2xl shadow-2xl flex flex-col gap-6">
@@ -281,13 +235,40 @@ const App = () => {
                 ),
               },
               {
-                id: "prompt",
-                label: "Prompt",
+                id: "custom",
+                label: "Custom",
                 content: (
-                  <div className="bg-gray-800 p-6 rounded-2xl shadow-2xl">
-                    <p className="text-gray-400">
-                      Prompt tab will be implemented next.
-                    </p>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="bg-gray-800 p-6 rounded-2xl shadow-2xl flex flex-col gap-6">
+                      <ImageUploader
+                        selectedImage={selectedImage}
+                        onChange={handleImageUpload}
+                      />
+                      <PromptEnter
+                        value={customPrompt}
+                        onChange={setCustomPrompt}
+                      />
+                      <button
+                        onClick={handleGenerateFromCustomPrompt}
+                        disabled={
+                          (!customPrompt.trim() && !selectedImage) || isLoading
+                        }
+                        className="w-full mt-auto py-3 px-4 rounded-lg text-lg font-bold text-white bg-gradient-to-r from-blue-600 to-blue-200 hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2">
+                        {isLoading ? "Generating..." : "Generate"}
+                      </button>
+                    </div>
+
+                    <ResultPanel
+                      isLoading={isLoading}
+                      error={error}
+                      generatedImage={generatedImage}
+                      generatedCaption={generatedCaption}
+                      isCaptionLoading={isCaptionLoading}
+                      captionCopied={captionCopied}
+                      onDownload={handleDownload}
+                      onGenerateCaption={handleGenerateCaptionForCustomPrompt}
+                      onCopyCaption={handleCopyCaption}
+                    />
                   </div>
                 ),
               },
