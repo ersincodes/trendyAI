@@ -7,7 +7,7 @@ import { socialImgs } from "../lib/constants";
  */
 const Footer = () => {
   return (
-    <footer className="flex flex-col md:flex-row justify-center md:justify-between items-center gap-3 md:gap-0 px-4 md:px-8 py-6 md:py-6 w-full mt-3">
+    <footer className="fixed bottom-0 left-0 right-0 flex flex-col md:flex-row justify-center md:justify-between items-center gap-3 md:gap-0 px-4 md:px-8 py-6 md:py-6 w-full backdrop-blur-sm z-20">
       {/* Left section - Terms */}
       <div className="flex-1 text-center md:text-left order-3 md:order-1">
         <a
