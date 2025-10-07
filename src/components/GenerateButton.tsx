@@ -1,13 +1,10 @@
-/**
- * Reusable generate button component
- * Follows SRP and DRY - Single, reusable button component
- *
- * @param {Object} props
- * @param {Function} props.onClick - Click handler
- * @param {boolean} props.isDisabled - Disabled state
- * @param {string} props.label - Button label text
- */
-const GenerateButton = ({ onClick, isDisabled, label }) => {
+type Props = {
+  onClick: () => void;
+  isDisabled?: boolean;
+  label: string;
+};
+
+const GenerateButton = ({ onClick, isDisabled, label }: Props) => {
   return (
     <button
       onClick={onClick}

@@ -1,4 +1,6 @@
-export const PROMPTS = [
+import type { Prompt } from "../types";
+
+export const PROMPTS: Prompt[] = [
   {
     id: 1,
     title: "3D Toy Figurine",
@@ -9,7 +11,7 @@ export const PROMPTS = [
     id: 2,
     title: "Polaroid Photo",
     prompt:
-      "Create a candid, retro Polaroid-style photo of a smiling person, as if taken with an on-camera flash in a dimly lit room. The photo should have a nostalgic, slightly blurry feel like a real snapshot. Do not alter the person's facial features. The background should be simple, like soft white curtains, to keep the focus on the subject. The person should be looking at the camera, captured in a natural moment.",
+      "Create a candid, retro Polaroid-style photo of the character, as if taken with an on-camera flash in a dimly lit room. The photo should have a nostalgic, slightly blurry feel like a real snapshot. Do not alter the character's facial features. The background should be simple, like soft white curtains, to keep the focus on the subject. The character should be looking at the camera, captured in a natural moment.",
   },
   {
     id: 3,
@@ -27,7 +29,7 @@ export const PROMPTS = [
     id: 5,
     title: "Mini Me",
     prompt:
-      "Shrink this person down to ant-size and place them in a giant backyard environment. Show them exploring under tall blades of grass or climbing everyday objects that now look massive. Capture the fun perspective of living like an ant.",
+      "Shrink this character down to ant-size and place them in a giant backyard environment. Show them exploring under tall blades of grass or climbing everyday objects that now look massive. Capture the fun perspective of living like an ant.",
   },
   {
     id: 6,

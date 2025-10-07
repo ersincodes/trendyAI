@@ -1,4 +1,12 @@
-const PromptSelector = ({ prompts, selectedPromptId, onSelect }) => (
+import type { Prompt } from "../types";
+
+type Props = {
+  prompts: Prompt[];
+  selectedPromptId?: number | null;
+  onSelect: (id: number) => void;
+};
+
+const PromptSelector = ({ prompts, selectedPromptId, onSelect }: Props) => (
   <div>
     <h2 className="text-2xl font-bold mb-4 border-b-2 border-blue-500 pb-2">
       2. Choose a Style

@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { TabItem } from "../types";
 
-const TabView = ({ tabs = [], initialActiveId, onChange }) => {
+type Props = {
+  tabs?: TabItem[];
+  initialActiveId?: string;
+  onChange?: (id: string) => void;
+};
+
+const TabView = ({ tabs = [], initialActiveId, onChange }: Props) => {
   const validTabs = useMemo(
     () => tabs.filter((t) => t && t.id && t.label),
     [tabs]
@@ -12,15 +19,15 @@ const TabView = ({ tabs = [], initialActiveId, onChange }) => {
     return validTabs[0]?.id || null;
   }, [initialActiveId, validTabs]);
 
-  const [activeId, setActiveId] = useState(defaultActiveId);
-  const tabButtonRefs = useRef([]);
+  const [activeId, setActiveId] = useState<string | null>(defaultActiveId);
+  const tabButtonRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   useEffect(() => {
     setActiveId(defaultActiveId);
   }, [defaultActiveId]);
 
   const handleSelect = useCallback(
-    (id, index) => {
+    (id: string | null, index: number) => {
       if (!id) return;
       setActiveId(id);
       if (typeof onChange === "function") onChange(id);
@@ -31,9 +38,11 @@ const TabView = ({ tabs = [], initialActiveId, onChange }) => {
   );
 
   const focusTabByIndex = useCallback(
-    (index) => {
+    (index: number) => {
       if (index < 0 || index >= validTabs.length) return;
-      const id = validTabs[index].id;
+      const tab = validTabs[index];
+      if (!tab) return;
+      const id = tab.id;
       setActiveId(id);
       const btn = tabButtonRefs.current[index];
       if (btn) btn.focus();
@@ -43,7 +52,7 @@ const TabView = ({ tabs = [], initialActiveId, onChange }) => {
   );
 
   const handleKeyDown = useCallback(
-    (event, index) => {
+    (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
       const key = event.key;
       if (key === "ArrowRight") {
         event.preventDefault();
@@ -73,7 +82,7 @@ const TabView = ({ tabs = [], initialActiveId, onChange }) => {
   if (validTabs.length === 0) return null;
 
   const activeIndex = validTabs.findIndex((t) => t.id === activeId);
-  const activeTab = activeIndex >= 0 ? validTabs[activeIndex] : validTabs[0];
+  const activeTab = validTabs[activeIndex] ?? validTabs[0];
 
   return (
     <div className="w-full">
@@ -82,11 +91,13 @@ const TabView = ({ tabs = [], initialActiveId, onChange }) => {
         aria-label="Tabs"
         className="flex items-end justify-center gap-2 border-b border-gray-700">
         {validTabs.map((tab, index) => {
-          const isSelected = tab.id === activeTab.id;
+          const isSelected = tab.id === activeTab!.id;
           return (
             <button
               key={tab.id}
-              ref={(el) => (tabButtonRefs.current[index] = el)}
+              ref={(el) => {
+                tabButtonRefs.current[index] = el;
+              }}
               id={`tab-${tab.id}`}
               role="tab"
               aria-selected={isSelected}
@@ -103,12 +114,12 @@ const TabView = ({ tabs = [], initialActiveId, onChange }) => {
       </div>
 
       <div
-        id={`panel-${activeTab.id}`}
+        id={`panel-${activeTab!.id}`}
         role="tabpanel"
-        aria-labelledby={`tab-${activeTab.id}`}
+        aria-labelledby={`tab-${activeTab!.id}`}
         tabIndex={0}
         className="mt-4">
-        {activeTab.content}
+        {activeTab!.content}
       </div>
     </div>
   );

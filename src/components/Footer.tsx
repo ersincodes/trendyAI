@@ -1,10 +1,5 @@
-import { InstagramIcon } from "../assets/icons/Icons";
 import { socialImgs } from "../lib/constants";
 
-/**
- * Footer component with creator information and social links
- * Follows SRP - Single responsibility of rendering footer
- */
 const Footer = () => {
   return (
     <footer className="fixed bottom-0 left-0 right-0 flex flex-col md:flex-row justify-center md:justify-between items-center gap-3 md:gap-0 px-4 md:px-8 py-6 md:py-6 w-full backdrop-blur-sm z-20">
