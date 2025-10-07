@@ -1,6 +1,18 @@
 import LoadingSpinner from "./LoadingSpinner";
 import { DownloadIcon, CopyIcon, CheckIcon } from "../assets/icons/Icons";
 
+type Props = {
+  isLoading: boolean;
+  error?: string | null;
+  generatedImage?: string | null;
+  generatedCaption?: string | null;
+  isCaptionLoading: boolean;
+  captionCopied: boolean;
+  onDownload: () => void;
+  onGenerateCaption: () => void;
+  onCopyCaption: () => void;
+};
+
 const ResultPanel = ({
   isLoading,
   error,
@@ -11,7 +23,7 @@ const ResultPanel = ({
   onDownload,
   onGenerateCaption,
   onCopyCaption,
-}) => (
+}: Props) => (
   <div className="bg-gray-800 p-6 rounded-2xl shadow-2xl flex flex-col items-center justify-center min-h-[400px] lg:min-h-0">
     <h2 className="text-2xl font-bold mb-4 self-start border-b-2 border-blue-500 pb-2">
       3. Result

@@ -1,6 +1,6 @@
-// Clipboard and download helpers
-
-export const copyToClipboard = async (text) => {
+export const copyToClipboard = async (
+  text: string | null | undefined
+): Promise<boolean> => {
   if (!text) return false;
   try {
     await navigator.clipboard.writeText(text);
@@ -21,7 +21,10 @@ export const copyToClipboard = async (text) => {
   }
 };
 
-export const downloadDataUrl = async (dataUrl, filename = "image.png") => {
+export const downloadDataUrl = async (
+  dataUrl: string | null | undefined,
+  filename: string = "image.png"
+): Promise<boolean> => {
   if (!dataUrl) return false;
   try {
     const res = await fetch(dataUrl);

@@ -1,7 +1,3 @@
-/**
- * Page header component with title and tagline
- * Follows SRP - Single responsibility of rendering page header
- */
 const PageHeader = () => {
   return (
     <header className="text-center mb-8">

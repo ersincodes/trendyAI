@@ -1,7 +1,3 @@
-/**
- * Static background layer component
- * Renders a fixed gradient background and overlay, no props
- */
 const BackgroundLayer = () => {
   return (
     <>

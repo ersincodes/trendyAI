@@ -1,6 +1,11 @@
 import { UploadIcon } from "../assets/icons/Icons";
 
-const ImageUploader = ({ selectedImage, onChange }) => (
+type Props = {
+  selectedImage?: string | null;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+};
+
+const ImageUploader = ({ selectedImage, onChange }: Props) => (
   <div>
     <h2 className="text-2xl font-bold mb-3 border-b-2 border-blue-500 pb-2">
       1. Upload Your Photo

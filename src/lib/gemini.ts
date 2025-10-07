@@ -1,12 +1,10 @@
-// Centralized Gemini API utilities to keep components lean (SOLID/DRY)
-
 const API_BASE = "https://generativelanguage.googleapis.com/v1beta";
 const MODELS = {
   image: "gemini-2.5-flash-image-preview:generateContent",
   text: "gemini-2.5-flash-preview-05-20:generateContent",
-};
+} as const;
 
-const getApiKey = () => {
+const getApiKey = (): string => {
   const key = (import.meta.env.VITE_GOOGLE_API_KEY || "").trim();
   if (!key) {
     throw new Error(
@@ -16,7 +14,7 @@ const getApiKey = () => {
   return key;
 };
 
-const postModel = async (modelPath, payload) => {
+const postModel = async (modelPath: string, payload: unknown): Promise<any> => {
   const apiKey = getApiKey();
   const url = `${API_BASE}/models/${modelPath}?key=${apiKey}`;
   const response = await fetch(url, {
@@ -34,20 +32,24 @@ const postModel = async (modelPath, payload) => {
   return response.json();
 };
 
-const buildContents = (parts) => ({ contents: [{ parts }] });
+const buildContents = (parts: unknown[]) => ({ contents: [{ parts }] });
 
-const extractImageBase64FromResponse = (json) => {
+const extractImageBase64FromResponse = (json: any): string | null => {
   return (
-    json?.candidates?.[0]?.content?.parts?.find((p) => p.inlineData)?.inlineData
-      ?.data || null
+    json?.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData)
+      ?.inlineData?.data || null
   );
 };
 
-const extractTextFromResponse = (json) => {
+const extractTextFromResponse = (json: any): string | null => {
   return json?.candidates?.[0]?.content?.parts?.[0]?.text || null;
 };
 
-export const generateText = async ({ text }) => {
+export const generateText = async ({
+  text,
+}: {
+  text: string;
+}): Promise<string> => {
   if (!text) throw new Error("Text prompt is required");
   const payload = buildContents([{ text }]);
   const json = await postModel(MODELS.text, payload);
@@ -56,8 +58,16 @@ export const generateText = async ({ text }) => {
   return resultText;
 };
 
-export const generateImage = async ({ text, dataUrl, inlineData }) => {
-  const parts = [];
+export const generateImage = async ({
+  text,
+  dataUrl,
+  inlineData,
+}: {
+  text?: string;
+  dataUrl?: string;
+  inlineData?: { mimeType: string; data: string };
+}): Promise<string> => {
+  const parts: any[] = [];
   if (text) parts.push({ text });
   if (inlineData) {
     parts.push({ inlineData });

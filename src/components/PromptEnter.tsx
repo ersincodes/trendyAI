@@ -1,6 +1,12 @@
 import { useMemo } from "react";
 
-const PromptEnter = ({ value, onChange, maxLength = 1000 }) => {
+type Props = {
+  value: string;
+  onChange: (value: string) => void;
+  maxLength?: number;
+};
+
+const PromptEnter = ({ value, onChange, maxLength = 1000 }: Props) => {
   const remainingChars = useMemo(() => {
     if (!value) return maxLength;
     return Math.max(0, maxLength - value.length);

@@ -1,45 +1,35 @@
 import { useState, useCallback, useMemo } from "react";
-import { PROMPTS } from "./constants/prompts";
-import ResultPanel from "./components/ResultPanel";
-import TabView from "./components/TabView";
-import InputPanel from "./components/InputPanel";
-import PageHeader from "./components/PageHeader";
-import Footer from "./components/Footer";
-import BackgroundLayer from "./components/BackgroundLayer";
-import { downloadDataUrl } from "./lib/io";
-import useImageUpload from "./hooks/useImageUpload";
-import useImageGenerator from "./hooks/useImageGenerator";
-import useCaptionGenerator from "./hooks/useCaptionGenerator";
+import { PROMPTS } from "./constants/prompts.ts";
+import ResultPanel from "./components/ResultPanel.tsx";
+import TabView from "./components/TabView.tsx";
+import InputPanel from "./components/InputPanel.tsx";
+import PageHeader from "./components/PageHeader.tsx";
+import Footer from "./components/Footer.tsx";
+import BackgroundLayer from "./components/BackgroundLayer.tsx";
+import { downloadDataUrl } from "./lib/io.ts";
+import useImageUpload from "./hooks/useImageUpload.ts";
+import useImageGenerator from "./hooks/useImageGenerator.ts";
+import useCaptionGenerator from "./hooks/useCaptionGenerator.ts";
+import type { Prompt } from "./types";
 
-/**
- * Main App component - refactored to follow SOLID and DRY principles
- * - Uses custom hooks for separated concerns (SRP)
- * - Extracts reusable components (DRY)
- * - Delegates responsibilities to specialized modules (Dependency Inversion)
- */
 const App = () => {
-  // State management
-  const [selectedPromptId, setSelectedPromptId] = useState(null);
-  const [customPrompt, setCustomPrompt] = useState("");
+  const [selectedPromptId, setSelectedPromptId] = useState<number | null>(null);
+  const [customPrompt, setCustomPrompt] = useState<string>("");
 
-  // Custom hooks for different concerns (SRP)
   const imageUpload = useImageUpload();
   const imageGenerator = useImageGenerator();
   const captionGenerator = useCaptionGenerator();
 
-  // Memoized values
-  const selectedPrompt = useMemo(
+  const selectedPrompt = useMemo<Prompt | undefined>(
     () => PROMPTS.find((p) => p.id === selectedPromptId),
     [selectedPromptId]
   );
 
-  // Unified error state
   const error =
     imageUpload.error || imageGenerator.error || captionGenerator.error;
 
-  // Handler for image upload with state reset
   const handleImageUpload = useCallback(
-    async (event) => {
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
       await imageUpload.handleImageUpload(event);
       imageGenerator.resetState();
       captionGenerator.resetState();
@@ -47,7 +37,6 @@ const App = () => {
     [imageUpload, imageGenerator, captionGenerator]
   );
 
-  // Handler for Trend tab image generation
   const handleGenerateImage = useCallback(async () => {
     if (!imageUpload.selectedImage || !selectedPrompt) {
       imageGenerator.setError("Please upload an image and choose a style.");
@@ -66,7 +55,6 @@ const App = () => {
     captionGenerator,
   ]);
 
-  // Handler for Custom tab image generation
   const handleGenerateFromCustomPrompt = useCallback(async () => {
     const hasImage = !!imageUpload.selectedImage;
     const hasPrompt = !!customPrompt.trim();
@@ -88,7 +76,6 @@ const App = () => {
     captionGenerator,
   ]);
 
-  // Handler for caption generation (Trend tab)
   const handleGenerateCaption = useCallback(async () => {
     if (!selectedPrompt) return;
 
@@ -102,7 +89,6 @@ const App = () => {
     }
   }, [selectedPrompt, captionGenerator, imageGenerator]);
 
-  // Handler for caption generation (Custom tab)
   const handleGenerateCaptionForCustomPrompt = useCallback(async () => {
     const promptText = customPrompt.trim();
     if (!promptText) return;
@@ -117,7 +103,6 @@ const App = () => {
     }
   }, [customPrompt, captionGenerator, imageGenerator]);
 
-  // Handler for caption copy
   const handleCopyCaption = useCallback(async () => {
     const success = await captionGenerator.copyCaption(
       captionGenerator.generatedCaption
@@ -127,7 +112,6 @@ const App = () => {
     }
   }, [captionGenerator, imageGenerator]);
 
-  // Handler for image download
   const handleDownload = useCallback(async () => {
     if (!imageGenerator.generatedImage) return;
 
@@ -146,15 +130,14 @@ const App = () => {
     }
   }, [imageGenerator, selectedPrompt]);
 
-  // Render tabs content using InputPanel component (DRY)
   const renderTrendTab = () => (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       <InputPanel
         mode="trend"
-        selectedImage={imageUpload.selectedImage}
+        selectedImage={imageUpload.selectedImage ?? undefined}
         onImageUpload={handleImageUpload}
         prompts={PROMPTS}
-        selectedPromptId={selectedPromptId}
+        selectedPromptId={selectedPromptId ?? undefined}
         onPromptSelect={setSelectedPromptId}
         onGenerate={handleGenerateImage}
         isLoading={imageGenerator.isLoading}
@@ -166,9 +149,9 @@ const App = () => {
       />
       <ResultPanel
         isLoading={imageGenerator.isLoading}
-        error={error}
-        generatedImage={imageGenerator.generatedImage}
-        generatedCaption={captionGenerator.generatedCaption}
+        error={error ?? undefined}
+        generatedImage={imageGenerator.generatedImage ?? undefined}
+        generatedCaption={captionGenerator.generatedCaption || undefined}
         isCaptionLoading={captionGenerator.isLoading}
         captionCopied={captionGenerator.isCopied}
         onDownload={handleDownload}
@@ -182,7 +165,7 @@ const App = () => {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       <InputPanel
         mode="custom"
-        selectedImage={imageUpload.selectedImage}
+        selectedImage={imageUpload.selectedImage ?? undefined}
         onImageUpload={handleImageUpload}
         customPrompt={customPrompt}
         onCustomPromptChange={setCustomPrompt}
@@ -195,9 +178,9 @@ const App = () => {
       />
       <ResultPanel
         isLoading={imageGenerator.isLoading}
-        error={error}
-        generatedImage={imageGenerator.generatedImage}
-        generatedCaption={captionGenerator.generatedCaption}
+        error={error ?? undefined}
+        generatedImage={imageGenerator.generatedImage ?? undefined}
+        generatedCaption={captionGenerator.generatedCaption || undefined}
         isCaptionLoading={captionGenerator.isLoading}
         captionCopied={captionGenerator.isCopied}
         onDownload={handleDownload}
@@ -217,16 +200,8 @@ const App = () => {
         <main>
           <TabView
             tabs={[
-              {
-                id: "trend",
-                label: "Trend",
-                content: renderTrendTab(),
-              },
-              {
-                id: "custom",
-                label: "Custom",
-                content: renderCustomTab(),
-              },
+              { id: "trend", label: "Trend", content: renderTrendTab() },
+              { id: "custom", label: "Custom", content: renderCustomTab() },
             ]}
             initialActiveId="joy"
           />

@@ -1,16 +1,14 @@
 import { useState, useCallback } from "react";
 import { generateText as geminiGenerateText } from "../lib/gemini";
+import type { CaptionInput } from "../types";
 
-/**
- * Custom hook to handle caption generation logic
- * Follows SRP and DRY - Centralizes all caption generation logic
- */
 const useCaptionGenerator = () => {
-  const [generatedCaption, setGeneratedCaption] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isCopied, setIsCopied] = useState(false);
+  const [generatedCaption, setGeneratedCaption] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isCopied, setIsCopied] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const buildCaptionPrompt = useCallback((input) => {
+  const buildCaptionPrompt = useCallback((input: CaptionInput) => {
     const basePrompt = "Create a catchy and witty Instagram caption";
     const suffix =
       "Add popular related English hashtags at the end. Keep it short and engaging.";
@@ -27,21 +25,24 @@ const useCaptionGenerator = () => {
   }, []);
 
   const generateCaption = useCallback(
-    async (input) => {
-      if (!input?.value) return { success: false, error: "No input provided" };
+    async (input: CaptionInput) => {
+      if (!input?.value)
+        return { success: false as const, error: "No input provided" };
 
       setIsLoading(true);
       setGeneratedCaption("");
+      setError(null);
 
       try {
         const captionPrompt = buildCaptionPrompt(input);
         const text = await geminiGenerateText({ text: captionPrompt });
         setGeneratedCaption(text);
-        return { success: true, caption: text };
-      } catch (err) {
+        return { success: true as const, caption: text };
+      } catch (err: any) {
         console.error(err);
         const errorMessage = `An error occurred while generating the caption: ${err.message}`;
-        return { success: false, error: errorMessage };
+        setError(errorMessage);
+        return { success: false as const, error: errorMessage };
       } finally {
         setIsLoading(false);
       }
@@ -49,7 +50,7 @@ const useCaptionGenerator = () => {
     [buildCaptionPrompt]
   );
 
-  const copyCaption = useCallback(async (caption) => {
+  const copyCaption = useCallback(async (caption: string): Promise<boolean> => {
     if (!caption) return false;
 
     try {
@@ -72,10 +73,11 @@ const useCaptionGenerator = () => {
     generatedCaption,
     isLoading,
     isCopied,
+    error,
     generateCaption,
     copyCaption,
     resetState,
-  };
+  } as const;
 };
 
 export default useCaptionGenerator;
