@@ -6,13 +6,10 @@ import InputPanel from "./components/InputPanel";
 import PageHeader from "./components/PageHeader";
 import Footer from "./components/Footer";
 import BackgroundLayer from "./components/BackgroundLayer";
-import HistoricalEventBadge from "./components/HistoricalEventBadge";
 import { downloadDataUrl } from "./lib/io";
-import useHistoricalBackground from "./hooks/useHistoricalBackground";
 import useImageUpload from "./hooks/useImageUpload";
 import useImageGenerator from "./hooks/useImageGenerator";
 import useCaptionGenerator from "./hooks/useCaptionGenerator";
-import useKeyboardNavigation from "./hooks/useKeyboardNavigation";
 
 /**
  * Main App component - refactored to follow SOLID and DRY principles
@@ -29,14 +26,6 @@ const App = () => {
   const imageUpload = useImageUpload();
   const imageGenerator = useImageGenerator();
   const captionGenerator = useCaptionGenerator();
-  const historicalBackground = useHistoricalBackground();
-
-  // Keyboard navigation
-  useKeyboardNavigation({
-    onNext: historicalBackground.goToNext,
-    onPrevious: historicalBackground.goToPrevious,
-    isEnabled: historicalBackground.totalEvents > 1,
-  });
 
   // Memoized values
   const selectedPrompt = useMemo(
@@ -220,13 +209,9 @@ const App = () => {
 
   return (
     <div className="relative text-white min-h-screen font-sans p-4 sm:p-6 lg:p-8 overflow-hidden">
-      <BackgroundLayer
-        backgroundImage={historicalBackground.backgroundImage}
-        isLoading={historicalBackground.isLoading}
-        currentIndex={historicalBackground.currentIndex}
-      />
+      <BackgroundLayer />
 
-      <div className="container mx-auto max-w-7xl relative z-10">
+      <div className="container mx-auto max-w-7xl relative z-10 pb-32">
         <PageHeader />
 
         <main>
@@ -246,14 +231,6 @@ const App = () => {
             initialActiveId="joy"
           />
         </main>
-        <HistoricalEventBadge
-          eventInfo={historicalBackground.eventInfo}
-          currentIndex={historicalBackground.currentIndex}
-          totalEvents={historicalBackground.totalEvents}
-          onNext={historicalBackground.goToNext}
-          onPrevious={historicalBackground.goToPrevious}
-          isLoading={historicalBackground.isLoading}
-        />
 
         <Footer />
       </div>
