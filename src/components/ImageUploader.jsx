@@ -1,4 +1,4 @@
-import { UploadIcon } from "./icons/Icons";
+import { UploadIcon } from "../assets/icons/Icons";
 
 const ImageUploader = ({ selectedImage, onChange }) => (
   <div>

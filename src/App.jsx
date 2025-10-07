@@ -1,196 +1,233 @@
 import { useState, useCallback, useMemo } from "react";
 import { PROMPTS } from "./constants/prompts";
-import ImageUploader from "./components/ImageUploader";
-import PromptSelector from "./components/PromptSelector";
-import PromptEnter from "./components/PromptEnter";
 import ResultPanel from "./components/ResultPanel";
 import TabView from "./components/TabView";
-import { InstagramIcon } from "./components/icons/Icons";
-import {
-  generateImage as geminiGenerateImage,
-  generateText as geminiGenerateText,
-} from "./lib/gemini";
-import { isFileTooLarge, readFileAsDataUrl } from "./lib/image";
-import { copyToClipboard, downloadDataUrl } from "./lib/io";
+import InputPanel from "./components/InputPanel";
+import PageHeader from "./components/PageHeader";
+import Footer from "./components/Footer";
+import BackgroundLayer from "./components/BackgroundLayer";
+import HistoricalEventBadge from "./components/HistoricalEventBadge";
+import { downloadDataUrl } from "./lib/io";
+import useHistoricalBackground from "./hooks/useHistoricalBackground";
+import useImageUpload from "./hooks/useImageUpload";
+import useImageGenerator from "./hooks/useImageGenerator";
+import useCaptionGenerator from "./hooks/useCaptionGenerator";
+import useKeyboardNavigation from "./hooks/useKeyboardNavigation";
 
+/**
+ * Main App component - refactored to follow SOLID and DRY principles
+ * - Uses custom hooks for separated concerns (SRP)
+ * - Extracts reusable components (DRY)
+ * - Delegates responsibilities to specialized modules (Dependency Inversion)
+ */
 const App = () => {
-  const [selectedImage, setSelectedImage] = useState(null);
+  // State management
   const [selectedPromptId, setSelectedPromptId] = useState(null);
-  const [generatedImage, setGeneratedImage] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [generatedCaption, setGeneratedCaption] = useState("");
-  const [isCaptionLoading, setIsCaptionLoading] = useState(false);
-  const [captionCopied, setCaptionCopied] = useState(false);
   const [customPrompt, setCustomPrompt] = useState("");
 
-  const selectedPrompt = useMemo(() => {
-    return PROMPTS.find((p) => p.id === selectedPromptId);
-  }, [selectedPromptId]);
+  // Custom hooks for different concerns (SRP)
+  const imageUpload = useImageUpload();
+  const imageGenerator = useImageGenerator();
+  const captionGenerator = useCaptionGenerator();
+  const historicalBackground = useHistoricalBackground();
 
-  const handleImageUpload = useCallback(async (event) => {
-    const file = event.target.files && event.target.files[0];
-    if (!file) return;
+  // Keyboard navigation
+  useKeyboardNavigation({
+    onNext: historicalBackground.goToNext,
+    onPrevious: historicalBackground.goToPrevious,
+    isEnabled: historicalBackground.totalEvents > 1,
+  });
 
-    if (isFileTooLarge(file)) {
-      setError("File size exceeds 10MB. Please upload a smaller image.");
-      return;
-    }
+  // Memoized values
+  const selectedPrompt = useMemo(
+    () => PROMPTS.find((p) => p.id === selectedPromptId),
+    [selectedPromptId]
+  );
 
-    try {
-      const dataUrl = await readFileAsDataUrl(file);
-      setSelectedImage(dataUrl);
-      setGeneratedImage(null);
-      setGeneratedCaption("");
-      setError(null);
-    } catch {
-      setError("Failed to read the image file. Please try again.");
-    }
-  }, []);
+  // Unified error state
+  const error =
+    imageUpload.error || imageGenerator.error || captionGenerator.error;
 
+  // Handler for image upload with state reset
+  const handleImageUpload = useCallback(
+    async (event) => {
+      await imageUpload.handleImageUpload(event);
+      imageGenerator.resetState();
+      captionGenerator.resetState();
+    },
+    [imageUpload, imageGenerator, captionGenerator]
+  );
+
+  // Handler for Trend tab image generation
   const handleGenerateImage = useCallback(async () => {
-    if (!selectedImage || !selectedPrompt) {
-      setError("Please upload an image and choose a style.");
+    if (!imageUpload.selectedImage || !selectedPrompt) {
+      imageGenerator.setError("Please upload an image and choose a style.");
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
-    setGeneratedImage(null);
-    setGeneratedCaption("");
+    captionGenerator.resetState();
+    await imageGenerator.generateImage({
+      text: selectedPrompt.prompt,
+      dataUrl: imageUpload.selectedImage,
+    });
+  }, [
+    imageUpload.selectedImage,
+    selectedPrompt,
+    imageGenerator,
+    captionGenerator,
+  ]);
 
-    try {
-      const imageUrl = await geminiGenerateImage({
-        text: selectedPrompt.prompt,
-        dataUrl: selectedImage,
-      });
-      setGeneratedImage(imageUrl);
-    } catch (err) {
-      console.error(err);
-      setError(`An error occurred: ${err.message}`);
-    } finally {
-      setIsLoading(false);
+  // Handler for Custom tab image generation
+  const handleGenerateFromCustomPrompt = useCallback(async () => {
+    const hasImage = !!imageUpload.selectedImage;
+    const hasPrompt = !!customPrompt.trim();
+
+    if (!hasPrompt && !hasImage) {
+      imageGenerator.setError("Please enter a prompt or upload an image.");
+      return;
     }
-  }, [selectedImage, selectedPrompt]);
 
+    captionGenerator.resetState();
+    await imageGenerator.generateImage({
+      text: hasPrompt ? customPrompt.trim() : undefined,
+      dataUrl: hasImage ? imageUpload.selectedImage : undefined,
+    });
+  }, [
+    customPrompt,
+    imageUpload.selectedImage,
+    imageGenerator,
+    captionGenerator,
+  ]);
+
+  // Handler for caption generation (Trend tab)
   const handleGenerateCaption = useCallback(async () => {
     if (!selectedPrompt) return;
-    setIsCaptionLoading(true);
-    setGeneratedCaption("");
-    setError(null);
 
-    try {
-      const captionPrompt = `Create a catchy and witty Instagram caption that matches the following theme. Add popular related English hashtags at the end. Keep it short and engaging. Theme: ${selectedPrompt.title}`;
-      const text = await geminiGenerateText({ text: captionPrompt });
-      setGeneratedCaption(text);
-    } catch (err) {
-      console.error(err);
-      setError(
-        `An error occurred while generating the caption: ${err.message}`
-      );
-    } finally {
-      setIsCaptionLoading(false);
+    const result = await captionGenerator.generateCaption({
+      type: "theme",
+      value: selectedPrompt.title,
+    });
+
+    if (!result.success && result.error) {
+      imageGenerator.setError(result.error);
     }
-  }, [selectedPrompt]);
+  }, [selectedPrompt, captionGenerator, imageGenerator]);
 
+  // Handler for caption generation (Custom tab)
   const handleGenerateCaptionForCustomPrompt = useCallback(async () => {
     const promptText = customPrompt.trim();
     if (!promptText) return;
-    setIsCaptionLoading(true);
-    setGeneratedCaption("");
-    setError(null);
 
-    try {
-      const captionPrompt = `Create a catchy and witty Instagram caption based on the following prompt. Add popular related English hashtags at the end. Keep it short and engaging. Prompt: ${promptText}`;
-      const text = await geminiGenerateText({ text: captionPrompt });
-      setGeneratedCaption(text);
-    } catch (err) {
-      console.error(err);
-      setError(
-        `An error occurred while generating the caption: ${err.message}`
-      );
-    } finally {
-      setIsCaptionLoading(false);
+    const result = await captionGenerator.generateCaption({
+      type: "custom",
+      value: promptText,
+    });
+
+    if (!result.success && result.error) {
+      imageGenerator.setError(result.error);
     }
-  }, [customPrompt]);
+  }, [customPrompt, captionGenerator, imageGenerator]);
 
+  // Handler for caption copy
   const handleCopyCaption = useCallback(async () => {
-    if (!generatedCaption) return;
-    const success = await copyToClipboard(generatedCaption);
-    if (success) {
-      setCaptionCopied(true);
-      setTimeout(() => setCaptionCopied(false), 2000);
-    } else {
-      setError("Failed to copy text to clipboard.");
+    const success = await captionGenerator.copyCaption(
+      captionGenerator.generatedCaption
+    );
+    if (!success) {
+      imageGenerator.setError("Failed to copy text to clipboard.");
     }
-  }, [generatedCaption]);
+  }, [captionGenerator, imageGenerator]);
 
+  // Handler for image download
   const handleDownload = useCallback(async () => {
-    if (!generatedImage) return;
+    if (!imageGenerator.generatedImage) return;
 
     const safeTitle = (selectedPrompt?.title || "image")
       .toLowerCase()
       .replace(/\s+/g, "-");
     const ok = await downloadDataUrl(
-      generatedImage,
+      imageGenerator.generatedImage,
       `trendy-ai-${safeTitle}.png`
     );
+
     if (!ok) {
-      setError(
+      imageGenerator.setError(
         "An error occurred while downloading the image. Please try again."
       );
     }
-  }, [generatedImage, selectedPrompt]);
+  }, [imageGenerator, selectedPrompt]);
 
-  const handleGenerateFromCustomPrompt = useCallback(async () => {
-    const hasImage = !!selectedImage;
-    const hasPrompt = !!customPrompt.trim();
-    if (!hasPrompt && !hasImage) {
-      setError("Please enter a prompt or upload an image.");
-      return;
-    }
+  // Render tabs content using InputPanel component (DRY)
+  const renderTrendTab = () => (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <InputPanel
+        mode="trend"
+        selectedImage={imageUpload.selectedImage}
+        onImageUpload={handleImageUpload}
+        prompts={PROMPTS}
+        selectedPromptId={selectedPromptId}
+        onPromptSelect={setSelectedPromptId}
+        onGenerate={handleGenerateImage}
+        isLoading={imageGenerator.isLoading}
+        isDisabled={
+          !imageUpload.selectedImage ||
+          !selectedPromptId ||
+          imageGenerator.isLoading
+        }
+      />
+      <ResultPanel
+        isLoading={imageGenerator.isLoading}
+        error={error}
+        generatedImage={imageGenerator.generatedImage}
+        generatedCaption={captionGenerator.generatedCaption}
+        isCaptionLoading={captionGenerator.isLoading}
+        captionCopied={captionGenerator.isCopied}
+        onDownload={handleDownload}
+        onGenerateCaption={handleGenerateCaption}
+        onCopyCaption={handleCopyCaption}
+      />
+    </div>
+  );
 
-    setIsLoading(true);
-    setError(null);
-    setGeneratedImage(null);
-    setGeneratedCaption("");
-
-    try {
-      const imageUrl = await geminiGenerateImage({
-        text: hasPrompt ? customPrompt.trim() : undefined,
-        dataUrl: hasImage ? selectedImage : undefined,
-      });
-      setGeneratedImage(imageUrl);
-    } catch (err) {
-      console.error(err);
-      setError(`An error occurred: ${err.message}`);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [customPrompt, selectedImage]);
+  const renderCustomTab = () => (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <InputPanel
+        mode="custom"
+        selectedImage={imageUpload.selectedImage}
+        onImageUpload={handleImageUpload}
+        customPrompt={customPrompt}
+        onCustomPromptChange={setCustomPrompt}
+        onGenerate={handleGenerateFromCustomPrompt}
+        isLoading={imageGenerator.isLoading}
+        isDisabled={
+          (!customPrompt.trim() && !imageUpload.selectedImage) ||
+          imageGenerator.isLoading
+        }
+      />
+      <ResultPanel
+        isLoading={imageGenerator.isLoading}
+        error={error}
+        generatedImage={imageGenerator.generatedImage}
+        generatedCaption={captionGenerator.generatedCaption}
+        isCaptionLoading={captionGenerator.isLoading}
+        captionCopied={captionGenerator.isCopied}
+        onDownload={handleDownload}
+        onGenerateCaption={handleGenerateCaptionForCustomPrompt}
+        onCopyCaption={handleCopyCaption}
+      />
+    </div>
+  );
 
   return (
-    <div className="bg-gray-900 text-white min-h-screen font-sans p-4 sm:p-6 lg:p-8">
-      <div className="container mx-auto max-w-7xl">
-        <header className="text-center mb-8">
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-white">
-            Trendy AI
-          </h1>
-          <p className="text-gray-400 mt-2 text-lg">
-            Upload your photo, choose your style, and catch viral trends!
-          </p>
-          <div className="flex justify-center items-center gap-4 mt-4">
-            <p className="text-gray-500 text-sm">Created by Ersin Bahar.</p>
-            <a
-              href="https://www.instagram.com/ersinbahaar"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Ersin Bahar Instagram"
-              className="text-gray-400 hover:text-blue-500 transition-colors">
-              <InstagramIcon />
-            </a>
-          </div>
-        </header>
+    <div className="relative text-white min-h-screen font-sans p-4 sm:p-6 lg:p-8 overflow-hidden">
+      <BackgroundLayer
+        backgroundImage={historicalBackground.backgroundImage}
+        isLoading={historicalBackground.isLoading}
+        currentIndex={historicalBackground.currentIndex}
+      />
+
+      <div className="container mx-auto max-w-7xl relative z-10">
+        <PageHeader />
 
         <main>
           <TabView
@@ -198,84 +235,27 @@ const App = () => {
               {
                 id: "trend",
                 label: "Trend",
-                content: (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div className="bg-gray-800 p-6 rounded-2xl shadow-2xl flex flex-col gap-6">
-                      <ImageUploader
-                        selectedImage={selectedImage}
-                        onChange={handleImageUpload}
-                      />
-                      <PromptSelector
-                        prompts={PROMPTS}
-                        selectedPromptId={selectedPromptId}
-                        onSelect={setSelectedPromptId}
-                      />
-                      <button
-                        onClick={handleGenerateImage}
-                        disabled={
-                          !selectedImage || !selectedPromptId || isLoading
-                        }
-                        className="w-full mt-auto py-3 px-4 rounded-lg text-lg font-bold text-white bg-gradient-to-r from-blue-600 to-blue-200 hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2">
-                        {isLoading ? "Generating..." : "Transform Image"}
-                      </button>
-                    </div>
-
-                    <ResultPanel
-                      isLoading={isLoading}
-                      error={error}
-                      generatedImage={generatedImage}
-                      generatedCaption={generatedCaption}
-                      isCaptionLoading={isCaptionLoading}
-                      captionCopied={captionCopied}
-                      onDownload={handleDownload}
-                      onGenerateCaption={handleGenerateCaption}
-                      onCopyCaption={handleCopyCaption}
-                    />
-                  </div>
-                ),
+                content: renderTrendTab(),
               },
               {
                 id: "custom",
                 label: "Custom",
-                content: (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div className="bg-gray-800 p-6 rounded-2xl shadow-2xl flex flex-col gap-6">
-                      <ImageUploader
-                        selectedImage={selectedImage}
-                        onChange={handleImageUpload}
-                      />
-                      <PromptEnter
-                        value={customPrompt}
-                        onChange={setCustomPrompt}
-                      />
-                      <button
-                        onClick={handleGenerateFromCustomPrompt}
-                        disabled={
-                          (!customPrompt.trim() && !selectedImage) || isLoading
-                        }
-                        className="w-full mt-auto py-3 px-4 rounded-lg text-lg font-bold text-white bg-gradient-to-r from-blue-600 to-blue-200 hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2">
-                        {isLoading ? "Generating..." : "Generate"}
-                      </button>
-                    </div>
-
-                    <ResultPanel
-                      isLoading={isLoading}
-                      error={error}
-                      generatedImage={generatedImage}
-                      generatedCaption={generatedCaption}
-                      isCaptionLoading={isCaptionLoading}
-                      captionCopied={captionCopied}
-                      onDownload={handleDownload}
-                      onGenerateCaption={handleGenerateCaptionForCustomPrompt}
-                      onCopyCaption={handleCopyCaption}
-                    />
-                  </div>
-                ),
+                content: renderCustomTab(),
               },
             ]}
             initialActiveId="joy"
           />
         </main>
+        <HistoricalEventBadge
+          eventInfo={historicalBackground.eventInfo}
+          currentIndex={historicalBackground.currentIndex}
+          totalEvents={historicalBackground.totalEvents}
+          onNext={historicalBackground.goToNext}
+          onPrevious={historicalBackground.goToPrevious}
+          isLoading={historicalBackground.isLoading}
+        />
+
+        <Footer />
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import LoadingSpinner from "./LoadingSpinner";
-import { DownloadIcon, CopyIcon, CheckIcon } from "./icons/Icons";
+import { DownloadIcon, CopyIcon, CheckIcon } from "../assets/icons/Icons";
 
 const ResultPanel = ({
   isLoading,
