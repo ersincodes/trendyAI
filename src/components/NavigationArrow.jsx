@@ -1,8 +1,11 @@
-import PropTypes from "prop-types";
-
 /**
  * Reusable navigation arrow button component
  * Follows SRP and DRY - Single, reusable component for navigation arrows
+ *
+ * @param {Object} props
+ * @param {string} props.direction - Arrow direction ("left" or "right")
+ * @param {Function} props.onClick - Click handler
+ * @param {string} props.ariaLabel - Aria label for accessibility
  */
 const NavigationArrow = ({ direction, onClick, ariaLabel }) => {
   const isLeft = direction === "left";
@@ -33,12 +36,6 @@ const NavigationArrow = ({ direction, onClick, ariaLabel }) => {
       </svg>
     </button>
   );
-};
-
-NavigationArrow.propTypes = {
-  direction: PropTypes.oneOf(["left", "right"]).isRequired,
-  onClick: PropTypes.func.isRequired,
-  ariaLabel: PropTypes.string.isRequired,
 };
 
 export default NavigationArrow;
