@@ -1,8 +1,11 @@
-import PropTypes from "prop-types";
-
 /**
  * Background layer component with dynamic image
  * Follows SRP - Single responsibility of rendering background
+ *
+ * @param {Object} props
+ * @param {string} props.backgroundImage - Background image URL
+ * @param {boolean} props.isLoading - Loading state
+ * @param {number} props.currentIndex - Current index for key prop
  */
 const BackgroundLayer = ({ backgroundImage, isLoading, currentIndex }) => {
   return (
@@ -24,12 +27,6 @@ const BackgroundLayer = ({ backgroundImage, isLoading, currentIndex }) => {
       <div className="fixed inset-0 bg-gradient-to-b from-gray-900/70 via-gray-900/60 to-gray-900/70 backdrop-blur-sm" />
     </>
   );
-};
-
-BackgroundLayer.propTypes = {
-  backgroundImage: PropTypes.string,
-  isLoading: PropTypes.bool.isRequired,
-  currentIndex: PropTypes.number.isRequired,
 };
 
 export default BackgroundLayer;

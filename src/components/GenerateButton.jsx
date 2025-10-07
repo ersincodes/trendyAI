@@ -1,8 +1,11 @@
-import PropTypes from "prop-types";
-
 /**
  * Reusable generate button component
  * Follows SRP and DRY - Single, reusable button component
+ *
+ * @param {Object} props
+ * @param {Function} props.onClick - Click handler
+ * @param {boolean} props.isDisabled - Disabled state
+ * @param {string} props.label - Button label text
  */
 const GenerateButton = ({ onClick, isDisabled, label }) => {
   return (
@@ -13,12 +16,6 @@ const GenerateButton = ({ onClick, isDisabled, label }) => {
       {label}
     </button>
   );
-};
-
-GenerateButton.propTypes = {
-  onClick: PropTypes.func.isRequired,
-  isDisabled: PropTypes.bool.isRequired,
-  label: PropTypes.string.isRequired,
 };
 
 export default GenerateButton;
