@@ -1,9 +1,19 @@
-import PropTypes from "prop-types";
 import NavigationArrow from "./NavigationArrow";
 
 /**
  * Component for displaying historical event information
  * Follows SRP - Single responsibility of rendering event badge
+ *
+ * @param {Object} props
+ * @param {Object} props.eventInfo - Event information object
+ * @param {string} props.eventInfo.date - Event date
+ * @param {number} props.eventInfo.year - Event year
+ * @param {string} props.eventInfo.text - Event description
+ * @param {number} props.currentIndex - Current event index
+ * @param {number} props.totalEvents - Total number of events
+ * @param {Function} props.onNext - Handler for next event
+ * @param {Function} props.onPrevious - Handler for previous event
+ * @param {boolean} props.isLoading - Loading state
  */
 const HistoricalEventBadge = ({
   eventInfo,
@@ -57,19 +67,6 @@ const HistoricalEventBadge = ({
       )}
     </div>
   );
-};
-
-HistoricalEventBadge.propTypes = {
-  eventInfo: PropTypes.shape({
-    date: PropTypes.string.isRequired,
-    year: PropTypes.number.isRequired,
-    text: PropTypes.string.isRequired,
-  }),
-  currentIndex: PropTypes.number.isRequired,
-  totalEvents: PropTypes.number.isRequired,
-  onNext: PropTypes.func.isRequired,
-  onPrevious: PropTypes.func.isRequired,
-  isLoading: PropTypes.bool.isRequired,
 };
 
 export default HistoricalEventBadge;
