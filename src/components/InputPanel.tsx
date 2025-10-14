@@ -3,6 +3,7 @@ import PromptSelector from "./PromptSelector";
 import PromptEnter from "./PromptEnter";
 import GenerateButton from "./GenerateButton";
 import type { Prompt } from "../types";
+import { useTranslation } from "react-i18next";
 
 type Props =
   | {
@@ -29,11 +30,12 @@ type Props =
 
 const InputPanel = (props: Props) => {
   const isTrendMode = props.mode === "trend";
+  const { t } = useTranslation();
   const buttonLabel = props.isLoading
-    ? "Generating..."
+    ? t("common.generating")
     : isTrendMode
-    ? "Transform Image"
-    : "Generate";
+    ? t("input.transformImage")
+    : t("input.generate");
 
   return (
     <div className="bg-gray-800 p-6 rounded-2xl shadow-2xl flex flex-col gap-6">

@@ -1,6 +1,10 @@
 import { socialImgs } from "../lib/constants";
+import { useTranslation } from "react-i18next";
 
 const Footer = () => {
+  const { t } = useTranslation();
+  const year = new Date().getFullYear();
+  const owner = "Ersin Bahar";
   return (
     <footer className="fixed bottom-0 left-0 right-0 flex flex-col md:flex-row justify-center md:justify-between items-center gap-3 md:gap-0 px-4 md:px-8 py-6 md:py-6 w-full backdrop-blur-sm z-20">
       {/* Left section - Terms */}
@@ -8,8 +12,8 @@ const Footer = () => {
         <a
           href="#"
           className="text-white text-xs md:text-sm hover:text-gray-300 transition-colors"
-          aria-label="Terms and Conditions">
-          Terms & Conditions
+          aria-label={t("common.termsAria")!}>
+          {t("common.terms")}
         </a>
       </div>
 
@@ -22,7 +26,11 @@ const Footer = () => {
             target="_blank"
             rel="noopener noreferrer"
             className="w-9 h-9 md:w-10 md:h-10 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-colors"
-            aria-label={`Visit our ${socialImg.name || "social media"} page`}>
+            aria-label={
+              t("common.visitSocial", {
+                name: socialImg.name || "social media",
+              })!
+            }>
             <img
               src={socialImg.imgPath}
               alt={`${socialImg.name || "social"} icon`}
@@ -39,7 +47,7 @@ const Footer = () => {
           target="_blank"
           rel="noopener noreferrer"
           className="text-white text-xs md:text-sm">
-          © 2025 Ersin Bahar. All rights reserved.
+          {t("common.copyright", { year, owner })}
         </a>
       </div>
     </footer>

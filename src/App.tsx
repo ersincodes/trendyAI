@@ -11,8 +11,10 @@ import useImageUpload from "./hooks/useImageUpload.ts";
 import useImageGenerator from "./hooks/useImageGenerator.ts";
 import useCaptionGenerator from "./hooks/useCaptionGenerator.ts";
 import type { Prompt } from "./types";
+import { useTranslation } from "react-i18next";
 
 const App = () => {
+  const { t } = useTranslation();
   const [selectedPromptId, setSelectedPromptId] = useState<number | null>(null);
   const [customPrompt, setCustomPrompt] = useState<string>("");
 
@@ -20,10 +22,14 @@ const App = () => {
   const imageGenerator = useImageGenerator();
   const captionGenerator = useCaptionGenerator();
 
-  const selectedPrompt = useMemo<Prompt | undefined>(
-    () => PROMPTS.find((p) => p.id === selectedPromptId),
-    [selectedPromptId]
+  const localizedPrompts = useMemo<Prompt[]>(
+    () => PROMPTS.map((p) => ({ ...p, title: t(`prompts.titles.${p.id}`) })),
+    [t]
   );
+
+  const selectedPrompt = useMemo<Prompt | undefined>(() => {
+    return localizedPrompts.find((p) => p.id === selectedPromptId);
+  }, [localizedPrompts, selectedPromptId]);
 
   const error =
     imageUpload.error || imageGenerator.error || captionGenerator.error;
@@ -39,7 +45,7 @@ const App = () => {
 
   const handleGenerateImage = useCallback(async () => {
     if (!imageUpload.selectedImage || !selectedPrompt) {
-      imageGenerator.setError("Please upload an image and choose a style.");
+      imageGenerator.setError(t("errors.missingImageAndStyle"));
       return;
     }
 
@@ -53,6 +59,7 @@ const App = () => {
     selectedPrompt,
     imageGenerator,
     captionGenerator,
+    t,
   ]);
 
   const handleGenerateFromCustomPrompt = useCallback(async () => {
@@ -60,7 +67,7 @@ const App = () => {
     const hasPrompt = !!customPrompt.trim();
 
     if (!hasPrompt && !hasImage) {
-      imageGenerator.setError("Please enter a prompt or upload an image.");
+      imageGenerator.setError(t("errors.missingPromptOrImage"));
       return;
     }
 
@@ -74,6 +81,7 @@ const App = () => {
     imageUpload.selectedImage,
     imageGenerator,
     captionGenerator,
+    t,
   ]);
 
   const handleGenerateCaption = useCallback(async () => {
@@ -84,10 +92,10 @@ const App = () => {
       value: selectedPrompt.title,
     });
 
-    if (!result.success && result.error) {
-      imageGenerator.setError(result.error);
+    if (!result.success) {
+      imageGenerator.setError(t("errors.captionGenerateFailed"));
     }
-  }, [selectedPrompt, captionGenerator, imageGenerator]);
+  }, [selectedPrompt, captionGenerator, imageGenerator, t]);
 
   const handleGenerateCaptionForCustomPrompt = useCallback(async () => {
     const promptText = customPrompt.trim();
@@ -98,19 +106,19 @@ const App = () => {
       value: promptText,
     });
 
-    if (!result.success && result.error) {
-      imageGenerator.setError(result.error);
+    if (!result.success) {
+      imageGenerator.setError(t("errors.captionGenerateFailed"));
     }
-  }, [customPrompt, captionGenerator, imageGenerator]);
+  }, [customPrompt, captionGenerator, imageGenerator, t]);
 
   const handleCopyCaption = useCallback(async () => {
     const success = await captionGenerator.copyCaption(
       captionGenerator.generatedCaption
     );
     if (!success) {
-      imageGenerator.setError("Failed to copy text to clipboard.");
+      imageGenerator.setError(t("errors.copyFailed"));
     }
-  }, [captionGenerator, imageGenerator]);
+  }, [captionGenerator, imageGenerator, t]);
 
   const handleDownload = useCallback(async () => {
     if (!imageGenerator.generatedImage) return;
@@ -124,11 +132,9 @@ const App = () => {
     );
 
     if (!ok) {
-      imageGenerator.setError(
-        "An error occurred while downloading the image. Please try again."
-      );
+      imageGenerator.setError(t("errors.downloadFailed"));
     }
-  }, [imageGenerator, selectedPrompt]);
+  }, [imageGenerator, selectedPrompt, t]);
 
   const renderTrendTab = () => (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -136,7 +142,7 @@ const App = () => {
         mode="trend"
         selectedImage={imageUpload.selectedImage ?? undefined}
         onImageUpload={handleImageUpload}
-        prompts={PROMPTS}
+        prompts={localizedPrompts}
         selectedPromptId={selectedPromptId ?? undefined}
         onPromptSelect={setSelectedPromptId}
         onGenerate={handleGenerateImage}
@@ -200,10 +206,18 @@ const App = () => {
         <main>
           <TabView
             tabs={[
-              { id: "trend", label: "Trend", content: renderTrendTab() },
-              { id: "custom", label: "Custom", content: renderCustomTab() },
+              {
+                id: "trend",
+                label: t("tabs.trend"),
+                content: renderTrendTab(),
+              },
+              {
+                id: "custom",
+                label: t("tabs.custom"),
+                content: renderCustomTab(),
+              },
             ]}
-            initialActiveId="joy"
+            initialActiveId="trend"
           />
         </main>
 

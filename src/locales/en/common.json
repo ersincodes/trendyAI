@@ -1,0 +1,66 @@
+{
+  "headers": {
+    "title": "Trendy AI",
+    "subtitle": "Upload your photo, choose your style, and catch viral trends!"
+  },
+  "tabs": {
+    "trend": "Trend",
+    "custom": "Custom",
+    "aria": "Tabs"
+  },
+  "steps": {
+    "uploadTitle": "1. Upload Your Photo",
+    "chooseStyleTitle": "2. Choose a Style",
+    "enterPromptTitle": "2. Enter a Prompt",
+    "resultTitle": "3. Result"
+  },
+  "common": {
+    "generating": "Generating...",
+    "download": "Download",
+    "copy": "Copy",
+    "copied": "Copied",
+    "copyText": "Copy text",
+    "downloadImageTitle": "Download image",
+    "generateCaptionTitle": "Generate Instagram Caption with AI",
+    "generateCaption": "✨ Generate Instagram Caption",
+    "aiInspiration": "The AI is gathering inspiration...",
+    "generatedImageAlt": "Generated image",
+    "generatedImagePlaceholder": "Your generated image will appear here.",
+    "uploadImageAria": "Upload image",
+    "uploadedPreviewAlt": "Uploaded preview",
+    "chooseFile": "Choose a file or drag and drop",
+    "fileTypesHint": "PNG, JPG, GIF (up to 10MB)",
+    "enterPromptLabel": "Enter your prompt",
+    "enterPromptPlaceholder": "Describe what you want to generate...",
+    "maxCharacters": "Max {{max}} characters",
+    "remainingLeft": "{{count}} left",
+    "terms": "Terms & Conditions",
+    "termsAria": "Terms and Conditions",
+    "visitSocial": "Visit our {{name}} page",
+    "copyright": "© {{year}} {{owner}}. All rights reserved."
+  },
+  "input": {
+    "transformImage": "Transform Image",
+    "generate": "Generate"
+  },
+  "errors": {
+    "missingImageAndStyle": "Please upload an image and choose a style.",
+    "missingPromptOrImage": "Please enter a prompt or upload an image.",
+    "copyFailed": "Failed to copy text to clipboard.",
+    "downloadFailed": "An error occurred while downloading the image. Please try again.",
+    "captionGenerateFailed": "An error occurred while generating the caption. Please try again."
+  },
+  "spinner": {
+    "message": "Your image is being generated, please wait..."
+  },
+  "prompts": {
+    "titles": {
+      "1": "3D Toy Figurine",
+      "2": "Polaroid Photo",
+      "3": "Magazine Cover",
+      "4": "16-Bit Game Character",
+      "5": "Mini Me",
+      "6": "Museum Bust"
+    }
+  }
+}

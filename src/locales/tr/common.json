@@ -1,0 +1,66 @@
+{
+  "headers": {
+    "title": "Trendy AI",
+    "subtitle": "Fotoğrafını yükle, stilini seç ve viral trendleri yakala!"
+  },
+  "tabs": {
+    "trend": "Trend",
+    "custom": "Özel",
+    "aria": "Sekmeler"
+  },
+  "steps": {
+    "uploadTitle": "1. Fotoğrafını Yükle",
+    "chooseStyleTitle": "2. Bir Stil Seç",
+    "enterPromptTitle": "2. İstek Metni Gir",
+    "resultTitle": "3. Sonuç"
+  },
+  "common": {
+    "generating": "Oluşturuluyor...",
+    "download": "İndir",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı",
+    "copyText": "Metni kopyala",
+    "downloadImageTitle": "Görseli indir",
+    "generateCaptionTitle": "Yapay zekâ ile Instagram açıklaması oluştur",
+    "generateCaption": "✨ Instagram Açıklaması Oluştur",
+    "aiInspiration": "Yapay zekâ ilham topluyor...",
+    "generatedImageAlt": "Oluşturulan görsel",
+    "generatedImagePlaceholder": "Oluşturulan görselin burada görünecek.",
+    "uploadImageAria": "Görsel yükle",
+    "uploadedPreviewAlt": "Yüklenen önizleme",
+    "chooseFile": "Dosya seç veya sürükleyip bırak",
+    "fileTypesHint": "PNG, JPG, GIF (en fazla 10 MB)",
+    "enterPromptLabel": "İstek metni gir",
+    "enterPromptPlaceholder": "Ne oluşturmak istediğini tarif et...",
+    "maxCharacters": "En fazla {{max}} karakter",
+    "remainingLeft": "{{count}} kaldı",
+    "terms": "Şartlar ve Koşullar",
+    "termsAria": "Şartlar ve Koşullar",
+    "visitSocial": "{{name}} sayfamızı ziyaret et",
+    "copyright": "© {{year}} {{owner}}. Tüm hakları saklıdır."
+  },
+  "input": {
+    "transformImage": "Görseli Dönüştür",
+    "generate": "Oluştur"
+  },
+  "errors": {
+    "missingImageAndStyle": "Lütfen bir görsel yükleyin ve bir stil seçin.",
+    "missingPromptOrImage": "Lütfen bir istek metni girin veya bir görsel yükleyin.",
+    "copyFailed": "Metin panoya kopyalanamadı.",
+    "downloadFailed": "Görsel indirilirken bir hata oluştu. Lütfen tekrar deneyin.",
+    "captionGenerateFailed": "Açıklama oluşturulurken bir hata oluştu. Lütfen tekrar deneyin."
+  },
+  "spinner": {
+    "message": "Görseliniz oluşturuluyor, lütfen bekleyin..."
+  },
+  "prompts": {
+    "titles": {
+      "1": "3B Oyuncak Figürü",
+      "2": "Polaroid Fotoğraf",
+      "3": "Dergi Kapağı",
+      "4": "16-Bit Oyun Karakteri",
+      "5": "Mini Ben",
+      "6": "Müze Büstü"
+    }
+  }
+}

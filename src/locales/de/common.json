@@ -1,0 +1,66 @@
+{
+  "headers": {
+    "title": "Trendy AI",
+    "subtitle": "Lade dein Foto hoch, wähle deinen Stil und greife virale Trends auf!"
+  },
+  "tabs": {
+    "trend": "Trend",
+    "custom": "Eigene",
+    "aria": "Registerkarten"
+  },
+  "steps": {
+    "uploadTitle": "1. Lade dein Foto hoch",
+    "chooseStyleTitle": "2. Wähle einen Stil",
+    "enterPromptTitle": "2. Prompt eingeben",
+    "resultTitle": "3. Ergebnis"
+  },
+  "common": {
+    "generating": "Wird generiert...",
+    "download": "Herunterladen",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "copyText": "Text kopieren",
+    "downloadImageTitle": "Bild herunterladen",
+    "generateCaptionTitle": "Instagram-Beschriftung mit KI generieren",
+    "generateCaption": "✨ Instagram-Beschriftung generieren",
+    "aiInspiration": "Die KI sammelt gerade Inspiration...",
+    "generatedImageAlt": "Generiertes Bild",
+    "generatedImagePlaceholder": "Dein generiertes Bild erscheint hier.",
+    "uploadImageAria": "Bild hochladen",
+    "uploadedPreviewAlt": "Hochgeladene Vorschau",
+    "chooseFile": "Datei auswählen oder hierher ziehen",
+    "fileTypesHint": "PNG, JPG, GIF (bis 10 MB)",
+    "enterPromptLabel": "Prompt eingeben",
+    "enterPromptPlaceholder": "Beschreibe, was du generieren möchtest...",
+    "maxCharacters": "Max. {{max}} Zeichen",
+    "remainingLeft": "{{count}} übrig",
+    "terms": "AGB",
+    "termsAria": "Allgemeine Geschäftsbedingungen",
+    "visitSocial": "Besuche unsere {{name}}-Seite",
+    "copyright": "© {{year}} {{owner}}. Alle Rechte vorbehalten."
+  },
+  "input": {
+    "transformImage": "Bild transformieren",
+    "generate": "Generieren"
+  },
+  "errors": {
+    "missingImageAndStyle": "Bitte lade ein Bild hoch und wähle einen Stil.",
+    "missingPromptOrImage": "Bitte gib einen Prompt ein oder lade ein Bild hoch.",
+    "copyFailed": "Text konnte nicht in die Zwischenablage kopiert werden.",
+    "downloadFailed": "Beim Herunterladen des Bildes ist ein Fehler aufgetreten. Bitte versuche es erneut.",
+    "captionGenerateFailed": "Beim Erstellen der Beschriftung ist ein Fehler aufgetreten. Bitte versuche es erneut."
+  },
+  "spinner": {
+    "message": "Dein Bild wird generiert, bitte warten..."
+  },
+  "prompts": {
+    "titles": {
+      "1": "3D-Spielzeugfigur",
+      "2": "Polaroid-Foto",
+      "3": "Magazin-Cover",
+      "4": "16-Bit-Spielcharakter",
+      "5": "Mini-Me",
+      "6": "Museumsbüste"
+    }
+  }
+}
