@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { TabItem } from "../types";
 
 type Props = {
@@ -84,11 +85,12 @@ const TabView = ({ tabs = [], initialActiveId, onChange }: Props) => {
   const activeIndex = validTabs.findIndex((t) => t.id === activeId);
   const activeTab = validTabs[activeIndex] ?? validTabs[0];
 
+  const { t } = useTranslation();
   return (
     <div className="w-full">
       <div
         role="tablist"
-        aria-label="Tabs"
+        aria-label={t("tabs.aria")}
         className="flex items-end justify-center gap-2 border-b border-gray-700">
         {validTabs.map((tab, index) => {
           const isSelected = tab.id === activeTab!.id;
