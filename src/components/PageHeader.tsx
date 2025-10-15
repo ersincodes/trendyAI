@@ -5,7 +5,7 @@ import logo from "../assets/logo/ETHR-logo.png";
 const PageHeader = () => {
   const { t } = useTranslation();
   return (
-    <header className="mb-8">
+    <header className="mb-5">
       <nav className="flex items-center justify-between py-4 px-2">
         <div className="flex-1 flex items-center">
           <a

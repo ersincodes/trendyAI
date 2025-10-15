@@ -199,13 +199,13 @@ const App = () => {
 
   return (
     <>
-      <div className="relative text-white min-h-screen font-sans p-4 sm:p-6 lg:p-8 overflow-hidden">
+      <div className="relative text-white min-h-screen font-sans flex flex-col">
         <BackgroundLayer />
 
-        <div className="container mx-auto max-w-7xl relative z-10 pb-32">
+        <div className="container mx-auto max-w-7xl relative z-10 flex-1 flex flex-col p-4 sm:p-6 lg:p-8">
           <PageHeader />
 
-          <main>
+          <main className="flex-1 pb-8">
             <TabView
               tabs={[
                 {
