@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import { PROMPTS } from "./constants/prompts.ts";
 import ResultPanel from "./components/ResultPanel.tsx";
 import TabView from "./components/TabView.tsx";
@@ -197,33 +198,36 @@ const App = () => {
   );
 
   return (
-    <div className="relative text-white min-h-screen font-sans p-4 sm:p-6 lg:p-8 overflow-hidden">
-      <BackgroundLayer />
+    <>
+      <div className="relative text-white min-h-screen font-sans p-4 sm:p-6 lg:p-8 overflow-hidden">
+        <BackgroundLayer />
 
-      <div className="container mx-auto max-w-7xl relative z-10 pb-32">
-        <PageHeader />
+        <div className="container mx-auto max-w-7xl relative z-10 pb-32">
+          <PageHeader />
 
-        <main>
-          <TabView
-            tabs={[
-              {
-                id: "trend",
-                label: t("tabs.trend"),
-                content: renderTrendTab(),
-              },
-              {
-                id: "custom",
-                label: t("tabs.custom"),
-                content: renderCustomTab(),
-              },
-            ]}
-            initialActiveId="trend"
-          />
-        </main>
+          <main>
+            <TabView
+              tabs={[
+                {
+                  id: "trend",
+                  label: t("tabs.trend"),
+                  content: renderTrendTab(),
+                },
+                {
+                  id: "custom",
+                  label: t("tabs.custom"),
+                  content: renderCustomTab(),
+                },
+              ]}
+              initialActiveId="trend"
+            />
+          </main>
 
-        <Footer />
+          <Footer />
+        </div>
       </div>
-    </div>
+      <SpeedInsights />
+    </>
   );
 };
 
