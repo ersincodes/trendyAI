@@ -6,13 +6,16 @@
   "tabs": {
     "trend": "Trend",
     "custom": "Custom",
+    "textToImage": "Text to Image",
     "aria": "Tabs"
   },
   "steps": {
     "uploadTitle": "1. Upload Your Photo",
     "chooseStyleTitle": "2. Choose a Style",
     "enterPromptTitle": "2. Enter a Prompt",
-    "resultTitle": "3. Result"
+    "enterPromptTitleSimple": "1. Enter a Prompt",
+    "resultTitle": "3. Result",
+    "resultTitleSecond": "2. Result"
   },
   "common": {
     "generating": "Generating...",
@@ -46,6 +49,7 @@
   "errors": {
     "missingImageAndStyle": "Please upload an image and choose a style.",
     "missingPromptOrImage": "Please enter a prompt or upload an image.",
+    "missingPrompt": "Please enter a prompt.",
     "copyFailed": "Failed to copy text to clipboard.",
     "downloadFailed": "An error occurred while downloading the image. Please try again.",
     "captionGenerateFailed": "An error occurred while generating the caption. Please try again."

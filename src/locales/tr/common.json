@@ -6,13 +6,16 @@
   "tabs": {
     "trend": "Trend",
     "custom": "Özel",
+    "textToImage": "Metinden Görsele",
     "aria": "Sekmeler"
   },
   "steps": {
     "uploadTitle": "1. Fotoğrafını Yükle",
     "chooseStyleTitle": "2. Bir Stil Seç",
     "enterPromptTitle": "2. İstek Metni Gir",
-    "resultTitle": "3. Sonuç"
+    "enterPromptTitleSimple": "1. İstek Metni Gir",
+    "resultTitle": "3. Sonuç",
+    "resultTitleSecond": "2. Sonuç"
   },
   "common": {
     "generating": "Oluşturuluyor...",
@@ -46,6 +49,7 @@
   "errors": {
     "missingImageAndStyle": "Lütfen bir görsel yükleyin ve bir stil seçin.",
     "missingPromptOrImage": "Lütfen bir istek metni girin veya bir görsel yükleyin.",
+    "missingPrompt": "Lütfen bir istek metni girin.",
     "copyFailed": "Metin panoya kopyalanamadı.",
     "downloadFailed": "Görsel indirilirken bir hata oluştu. Lütfen tekrar deneyin.",
     "captionGenerateFailed": "Açıklama oluşturulurken bir hata oluştu. Lütfen tekrar deneyin."

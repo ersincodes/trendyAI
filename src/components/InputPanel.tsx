@@ -9,23 +9,27 @@ type Props =
   | {
       mode: "trend";
       selectedImage?: string | null;
-      onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+      onImageUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
       prompts: Prompt[];
       selectedPromptId?: number | null;
       onPromptSelect: (id: number | null) => void;
       onGenerate: () => void;
       isLoading: boolean;
       isDisabled: boolean;
+      showUploader?: boolean;
+      promptTitle?: string;
     }
   | {
       mode: "custom";
       selectedImage?: string | null;
-      onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+      onImageUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
       customPrompt: string;
       onCustomPromptChange: (value: string) => void;
       onGenerate: () => void;
       isLoading: boolean;
       isDisabled: boolean;
+      showUploader?: boolean;
+      promptTitle?: string;
     };
 
 const InputPanel = (props: Props) => {
@@ -39,10 +43,12 @@ const InputPanel = (props: Props) => {
 
   return (
     <div className="bg-gray-800 p-6 rounded-2xl shadow-2xl flex flex-col gap-6">
-      <ImageUploader
-        selectedImage={props.selectedImage ?? undefined}
-        onChange={props.onImageUpload}
-      />
+      {props.showUploader !== false && (props as any).onImageUpload && (
+        <ImageUploader
+          selectedImage={props.selectedImage ?? undefined}
+          onChange={(props as any).onImageUpload}
+        />
+      )}
 
       {isTrendMode ? (
         <PromptSelector
@@ -54,6 +60,7 @@ const InputPanel = (props: Props) => {
         <PromptEnter
           value={(props as any).customPrompt}
           onChange={(props as any).onCustomPromptChange}
+          title={(props as any).promptTitle}
         />
       )}
 
