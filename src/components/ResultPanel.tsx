@@ -12,6 +12,7 @@ type Props = {
   onDownload: () => void;
   onGenerateCaption: () => void;
   onCopyCaption: () => void;
+  title?: string;
 };
 
 const ResultPanel = ({
@@ -24,12 +25,13 @@ const ResultPanel = ({
   onDownload,
   onGenerateCaption,
   onCopyCaption,
+  title,
 }: Props) => {
   const { t } = useTranslation();
   return (
     <div className="bg-gray-800 p-6 rounded-2xl shadow-2xl flex flex-col items-center justify-center min-h-[400px] lg:min-h-0">
       <h2 className="text-2xl font-bold mb-4 self-start border-b-2 border-blue-500 pb-2">
-        {t("steps.resultTitle")}
+        {title || t("steps.resultTitle")}
       </h2>
       <div className="w-full h-full flex items-center justify-center">
         {isLoading && <LoadingSpinner />}

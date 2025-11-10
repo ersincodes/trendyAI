@@ -18,6 +18,7 @@ const App = () => {
   const { t } = useTranslation();
   const [selectedPromptId, setSelectedPromptId] = useState<number | null>(null);
   const [customPrompt, setCustomPrompt] = useState<string>("");
+  const [textOnlyPrompt, setTextOnlyPrompt] = useState<string>("");
 
   const imageUpload = useImageUpload();
   const imageGenerator = useImageGenerator();
@@ -85,6 +86,22 @@ const App = () => {
     t,
   ]);
 
+  // New: text-only generate/edit handler
+  const handleGenerateTextOnly = useCallback(async () => {
+    const prompt = textOnlyPrompt.trim();
+    if (!prompt) {
+      imageGenerator.setError(t("errors.missingPrompt"));
+      return;
+    }
+
+    captionGenerator.resetState();
+    const previousImage = imageGenerator.generatedImage;
+    await imageGenerator.generateImage({
+      text: prompt,
+      dataUrl: previousImage ?? undefined,
+    });
+  }, [textOnlyPrompt, imageGenerator, captionGenerator, t]);
+
   const handleGenerateCaption = useCallback(async () => {
     if (!selectedPrompt) return;
 
@@ -111,6 +128,21 @@ const App = () => {
       imageGenerator.setError(t("errors.captionGenerateFailed"));
     }
   }, [customPrompt, captionGenerator, imageGenerator, t]);
+
+  // New: text-only caption handler
+  const handleGenerateCaptionForTextOnly = useCallback(async () => {
+    const promptText = textOnlyPrompt.trim();
+    if (!promptText) return;
+
+    const result = await captionGenerator.generateCaption({
+      type: "custom",
+      value: promptText,
+    });
+
+    if (!result.success) {
+      imageGenerator.setError(t("errors.captionGenerateFailed"));
+    }
+  }, [textOnlyPrompt, captionGenerator, imageGenerator, t]);
 
   const handleCopyCaption = useCallback(async () => {
     const success = await captionGenerator.copyCaption(
@@ -197,6 +229,34 @@ const App = () => {
     </div>
   );
 
+  // New: Text-only tab
+  const renderTextOnlyTab = () => (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <InputPanel
+        mode="custom"
+        showUploader={false}
+        promptTitle={t("steps.enterPromptTitleSimple")}
+        customPrompt={textOnlyPrompt}
+        onCustomPromptChange={setTextOnlyPrompt}
+        onGenerate={handleGenerateTextOnly}
+        isLoading={imageGenerator.isLoading}
+        isDisabled={!textOnlyPrompt.trim() || imageGenerator.isLoading}
+      />
+      <ResultPanel
+        isLoading={imageGenerator.isLoading}
+        error={error ?? undefined}
+        generatedImage={imageGenerator.generatedImage ?? undefined}
+        generatedCaption={captionGenerator.generatedCaption || undefined}
+        isCaptionLoading={captionGenerator.isLoading}
+        captionCopied={captionGenerator.isCopied}
+        onDownload={handleDownload}
+        onGenerateCaption={handleGenerateCaptionForTextOnly}
+        onCopyCaption={handleCopyCaption}
+        title={t("steps.resultTitleSecond")}
+      />
+    </div>
+  );
+
   return (
     <>
       <div className="relative text-white min-h-screen font-sans flex flex-col">
@@ -217,6 +277,11 @@ const App = () => {
                   id: "custom",
                   label: t("tabs.custom"),
                   content: renderCustomTab(),
+                },
+                {
+                  id: "text",
+                  label: t("tabs.textToImage"),
+                  content: renderTextOnlyTab(),
                 },
               ]}
               initialActiveId="trend"

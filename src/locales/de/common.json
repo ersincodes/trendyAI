@@ -6,13 +6,16 @@
   "tabs": {
     "trend": "Trend",
     "custom": "Eigene",
+    "textToImage": "Text zu Bild",
     "aria": "Registerkarten"
   },
   "steps": {
     "uploadTitle": "1. Lade dein Foto hoch",
     "chooseStyleTitle": "2. Wähle einen Stil",
     "enterPromptTitle": "2. Prompt eingeben",
-    "resultTitle": "3. Ergebnis"
+    "enterPromptTitleSimple": "1. Prompt eingeben",
+    "resultTitle": "3. Ergebnis",
+    "resultTitleSecond": "2. Ergebnis"
   },
   "common": {
     "generating": "Wird generiert...",
@@ -46,6 +49,7 @@
   "errors": {
     "missingImageAndStyle": "Bitte lade ein Bild hoch und wähle einen Stil.",
     "missingPromptOrImage": "Bitte gib einen Prompt ein oder lade ein Bild hoch.",
+    "missingPrompt": "Bitte gib einen Prompt ein.",
     "copyFailed": "Text konnte nicht in die Zwischenablage kopiert werden.",
     "downloadFailed": "Beim Herunterladen des Bildes ist ein Fehler aufgetreten. Bitte versuche es erneut.",
     "captionGenerateFailed": "Beim Erstellen der Beschriftung ist ein Fehler aufgetreten. Bitte versuche es erneut."

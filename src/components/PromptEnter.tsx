@@ -5,9 +5,10 @@ type Props = {
   value: string;
   onChange: (value: string) => void;
   maxLength?: number;
+  title?: string;
 };
 
-const PromptEnter = ({ value, onChange, maxLength = 1000 }: Props) => {
+const PromptEnter = ({ value, onChange, maxLength = 1000, title }: Props) => {
   const remainingChars = useMemo(() => {
     if (!value) return maxLength;
     return Math.max(0, maxLength - value.length);
@@ -17,7 +18,7 @@ const PromptEnter = ({ value, onChange, maxLength = 1000 }: Props) => {
   return (
     <div>
       <h2 className="text-2xl font-bold mb-3 border-b-2 border-blue-500 pb-2">
-        {t("steps.enterPromptTitle")}
+        {title || t("steps.enterPromptTitle")}
       </h2>
       <label htmlFor="custom-prompt" className="sr-only">
         {t("common.enterPromptLabel")}
