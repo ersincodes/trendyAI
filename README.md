@@ -10,7 +10,7 @@
 
 ## ✨ Features
 
-- Upload an image and transform it into trendy visual styles powered by Gemini 2.5
+- Upload an image and transform it into trendy visual styles powered by Gemini 3
 - Curated style presets (e.g., 3D Toy Figurine, Polaroid Photo, Magazine Cover)
 - One-click download of generated images
 - AI-generated Instagram caption with popular hashtags
@@ -61,8 +61,8 @@ VITE_GOOGLE_API_KEY=your_google_generative_language_api_key
 
 This key is used by:
 
-- Image generation: `gemini-2.5-flash-image-preview:generateContent`
-- Caption generation: `gemini-2.5-flash-preview-05-20:generateContent`
+- Image generation: `gemini-3-pro-image-preview:generateContent`
+- Caption generation: `gemini-3-flash-preview:generateContent`
 
 ## 🖼️ How It Works
 

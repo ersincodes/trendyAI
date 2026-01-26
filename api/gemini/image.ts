@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 const API_BASE = "https://generativelanguage.googleapis.com/v1beta";
-const MODEL_PATH = "gemini-2.5-flash-image-preview:generateContent";
+const MODEL_PATH = "gemini-3-pro-image-preview:generateContent";
 
 const getApiKey = (res: VercelResponse): string | null => {
   const key = (process.env.GOOGLE_API_KEY || "").trim();
